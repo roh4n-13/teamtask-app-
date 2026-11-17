@@ -8,10 +8,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import {
   Bell,
+  Camera,
   Check,
   ChevronLeft,
   ClipboardList,
   Home,
+  Image as ImageIcon,
   Plus,
   User as UserIcon,
   Users,
@@ -247,6 +249,7 @@ export function PhotoPicker({
   maxPhotos?: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -264,8 +267,11 @@ export function PhotoPicker({
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
+      if (cameraRef.current) cameraRef.current.value = "";
     }
   }
+
+  const disabled = busy || photos.length >= maxPhotos;
 
   return (
     <div>
@@ -274,6 +280,15 @@ export function PhotoPicker({
         type="file"
         accept="image/*"
         multiple
+        className="hidden"
+        onChange={(e) => void handleFiles(e.target.files)}
+      />
+      {/* Direct camera capture — opens the phone camera straight away, no chooser. */}
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
         className="hidden"
         onChange={(e) => void handleFiles(e.target.files)}
       />
@@ -295,14 +310,29 @@ export function PhotoPicker({
           ))}
         </div>
       )}
-      <button
-        type="button"
-        disabled={busy || photos.length >= maxPhotos}
-        onClick={() => inputRef.current?.click()}
-        className="w-full rounded-xl border-2 border-dashed border-stone-300 py-3 text-sm font-medium text-stone-600 disabled:opacity-50"
-      >
-        {busy ? "Compressing photo…" : photos.length >= maxPhotos ? `Maximum ${maxPhotos} photos` : "+ Add photo proof"}
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => cameraRef.current?.click()}
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-charcoal py-3 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          <Camera size={17} />
+          {busy ? "Compressing photo…" : "Take Photo"}
+        </button>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => inputRef.current?.click()}
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-dashed border-stone-300 py-3 text-sm font-medium text-stone-600 disabled:opacity-50"
+        >
+          <ImageIcon size={17} />
+          Gallery
+        </button>
+      </div>
+      {photos.length >= maxPhotos && (
+        <p className="mt-1 text-[11px] text-stone-400">Maximum {maxPhotos} photos added.</p>
+      )}
       <p className="mt-1 text-[11px] text-stone-400">
         Photos are compressed to about 200 KB before saving. {photos.length}/{maxPhotos} added.
       </p>
