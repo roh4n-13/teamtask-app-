@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Environment — NEVER commit real keys. .env.local holds the Supabase URL
+# and anon key for this project; it is local-only by design.
+.env
+.env.local
+.env*.local
+
+# Misc
+.DS_Store
+*.log

@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-charcoal: #1a1a1a;
+  --color-charcoal-2: #232323;
+  --color-gold: #d4a024;
+  --color-gold-deep: #c8961e;
+  --color-gold-light: #f5ebd0;
+  --color-crimson: #c82828;
+  --color-paper: #faf7f2;
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html,
+body {
+  background: #e8e2d5;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: #1a1a1a;
+  -webkit-font-smoothing: antialiased;
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+}
+
+/* Keep number/date inputs tidy on mobile */
+input[type="date"] {
+  min-height: 44px;
+}
