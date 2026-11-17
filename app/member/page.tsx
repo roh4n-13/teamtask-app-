@@ -46,6 +46,15 @@ function MemberDashboardInner() {
           <StatBox label="Done" value={done} />
         </div>
 
+        {/* Attendance */}
+        <Link href="/attendance" className="mt-3 flex items-center justify-between rounded-2xl bg-gold-light px-4 py-3.5">
+          <span>
+            <span className="block text-sm font-bold text-charcoal">Attendance</span>
+            <span className="text-xs text-stone-500">Check in when you arrive at the centre</span>
+          </span>
+          <span className="text-sm font-bold text-gold-deep">Check In →</span>
+        </Link>
+
         {overdue.length > 0 && (
           <Link href="/tasks?filter=overdue" className="mt-3 block rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
             {overdue.length} task{overdue.length > 1 ? "s" : ""} overdue — finish them first →

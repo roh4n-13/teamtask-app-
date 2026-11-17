@@ -30,6 +30,7 @@ import {
 import { signUpClient, phoneToEmail, supabase } from "./supabase";
 import type {
   AppNotification,
+  AttendanceRecord,
   NotificationKind,
   Priority,
   Role,
@@ -39,6 +40,7 @@ import type {
   Team,
   User,
 } from "./types";
+import { todayISTISO } from "./utils";
 
 export interface AssignInput {
   title: string;
@@ -72,6 +74,11 @@ interface StoreState {
   tasks: Task[];
   notifications: AppNotification[];
   currentUser: User | null;
+  /** Today's attendance rows in the viewer's scope (RLS: member sees own,
+   * manager own team, admin all). Refreshed on login and after check-in/out. */
+  todayAttendance: AttendanceRecord[];
+  /** True while today's attendance is being (re)loaded. */
+  attendanceLoading: boolean;
 }
 
 interface StoreValue extends StoreState {
@@ -94,6 +101,14 @@ interface StoreValue extends StoreState {
   resubmitTask: (taskId: string, note: string, photos: string[]) => Promise<void>;
   // Members
   addMember: (input: AddMemberInput) => Promise<User>;
+  // Attendance (check-in / check-out — records are NEVER deleted)
+  getTodayAttendance: () => Promise<AttendanceRecord | null>;
+  checkIn: () => Promise<AttendanceRecord>;
+  checkOut: () => Promise<AttendanceRecord>;
+  getTeamToday: () => Promise<AttendanceRecord[]>;
+  getHistory: (userId: string, limit?: number) => Promise<AttendanceRecord[]>;
+  fixCheckOut: (attendanceId: string, time: string) => Promise<void>;
+  refreshTodayAttendance: () => Promise<void>;
   // Notifications
   markNotificationRead: (id: string) => Promise<void>;
   markAllNotificationsRead: () => Promise<void>;
@@ -152,6 +167,15 @@ interface NotificationRow {
   task_id: string | null;
   message: string;
   is_read: boolean;
+  created_at: string;
+}
+interface AttendanceRow {
+  id: string;
+  user_id: string;
+  team_id: string | null;
+  work_date: string;
+  check_in_at: string;
+  check_out_at: string | null;
   created_at: string;
 }
 
@@ -215,6 +239,21 @@ function mapNotification(row: NotificationRow): AppNotification {
   };
 }
 
+function mapAttendance(row: AttendanceRow): AttendanceRecord {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    teamId: row.team_id,
+    workDate: row.work_date,
+    checkInAt: row.check_in_at,
+    checkOutAt: row.check_out_at,
+    createdAt: row.created_at,
+  };
+}
+
+/** The single organisation (Ouroboros Art Hub) — seeded id in migration-001. */
+const ORG_ID = "00000000-0000-0000-0000-000000000001";
+
 // --- Storage helpers ---------------------------------------------------------
 function dataUrlToBlob(dataUrl: string): Blob {
   const [header, base64] = dataUrl.split(",");
@@ -259,6 +298,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [todayAttendance, setTodayAttendance] = useState<AttendanceRecord[]>([]);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -279,7 +320,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const token = ++loadToken.current;
     setLoading(true);
     try {
-      const [teamsRes, usersRes, tasksRes, notifRes] = await Promise.all([
+      const [teamsRes, usersRes, tasksRes, notifRes, attRes] = await Promise.all([
         supabase.from("teams").select("*").order("created_at"),
         supabase.from("profiles").select("*").order("name"),
         supabase
@@ -293,12 +334,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
           .limit(100),
+        // Today's attendance — RLS scopes it: member sees own rows,
+        // manager own team, admin all.
+        supabase
+          .from("attendance")
+          .select("*")
+          .eq("work_date", todayISTISO())
+          .order("check_in_at", { ascending: true }),
       ]);
       if (token !== loadToken.current) return; // a newer load superseded this one
       if (teamsRes.error) throw teamsRes.error;
       if (usersRes.error) throw usersRes.error;
       if (tasksRes.error) throw tasksRes.error;
       if (notifRes.error) throw notifRes.error;
+      if (attRes.error) throw attRes.error;
 
       const taskRows = (tasksRes.data ?? []) as unknown as TaskRow[];
       const paths: string[] = [];
@@ -313,6 +362,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setUsers((usersRes.data as unknown as ProfileRow[]).map(mapProfile));
       setTasks(taskRows.map((t) => mapTask(t, urlByPath)));
       setNotifications((notifRes.data as unknown as NotificationRow[]).map(mapNotification));
+      setTodayAttendance((attRes.data as unknown as AttendanceRow[]).map(mapAttendance));
     } finally {
       if (token === loadToken.current) setLoading(false);
     }
@@ -344,6 +394,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setUsers([]);
         setTasks([]);
         setNotifications([]);
+        setTodayAttendance([]);
         setAuthError(null);
         setAuthLoading(false);
         return;
@@ -481,6 +532,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setUsers([]);
     setTasks([]);
     setNotifications([]);
+    setTodayAttendance([]);
   }, []);
 
   // --- Tasks -----------------------------------------------------------------
@@ -740,6 +792,158 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [loadAll, logActivity],
   );
 
+  // --- Attendance (check-in / check-out) -------------------------------------
+  // Records are NEVER deleted: there is no delete function, no delete
+  // grant and no delete policy (migration-002). All queries go through the
+  // normal client, so RLS scopes every read/write (member: own rows,
+  // manager: own team, admin: all).
+  const fetchTodayRows = useCallback(async (): Promise<AttendanceRecord[]> => {
+    const { data, error } = await supabase
+      .from("attendance")
+      .select("*")
+      .eq("work_date", todayISTISO())
+      .order("check_in_at", { ascending: true });
+    if (error) throw error;
+    const rows = (data as unknown as AttendanceRow[]).map(mapAttendance);
+    setTodayAttendance(rows);
+    return rows;
+  }, []);
+
+  const refreshTodayAttendance = useCallback(async () => {
+    const me = currentUserRef.current;
+    if (!me) return;
+    setAttendanceLoading(true);
+    try {
+      await fetchTodayRows();
+    } catch (e) {
+      console.warn("Attendance load failed:", e);
+    } finally {
+      setAttendanceLoading(false);
+    }
+  }, [fetchTodayRows]);
+
+  const getTodayAttendance = useCallback(async (): Promise<AttendanceRecord | null> => {
+    const me = currentUserRef.current;
+    if (!me) return null;
+    const { data, error } = await supabase
+      .from("attendance")
+      .select("*")
+      .eq("user_id", me.id)
+      .eq("work_date", todayISTISO())
+      .maybeSingle();
+    if (error || !data) return null;
+    return mapAttendance(data as unknown as AttendanceRow);
+  }, []);
+
+  const checkIn = useCallback(async (): Promise<AttendanceRecord> => {
+    const me = currentUserRef.current;
+    if (!me) throw new Error("Please log in again.");
+    const { data, error } = await supabase
+      .from("attendance")
+      .insert({
+        user_id: me.id,
+        organisation_id: ORG_ID,
+        team_id: me.teamId,
+        work_date: todayISTISO(),
+        check_in_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+    if (error) {
+      // Unique (user_id, work_date): already checked in today — return it.
+      if (error.code === "23505") {
+        const existing = await getTodayAttendance();
+        if (existing) return existing;
+      }
+      throw new Error(`Could not check in: ${error.message}`);
+    }
+    const record = mapAttendance(data as unknown as AttendanceRow);
+    await refreshTodayAttendance();
+    return record;
+  }, [getTodayAttendance, refreshTodayAttendance]);
+
+  const checkOut = useCallback(async (): Promise<AttendanceRecord> => {
+    const me = currentUserRef.current;
+    if (!me) throw new Error("Please log in again.");
+    const { data, error } = await supabase
+      .from("attendance")
+      .update({ check_out_at: new Date().toISOString() })
+      .eq("user_id", me.id)
+      .eq("work_date", todayISTISO())
+      .is("check_out_at", null)
+      .select()
+      .single();
+    if (error || !data) {
+      throw new Error(
+        `Could not check out: ${error?.message ?? "no open check-in found for today"}`,
+      );
+    }
+    const record = mapAttendance(data as unknown as AttendanceRow);
+    await refreshTodayAttendance();
+    return record;
+  }, [refreshTodayAttendance]);
+
+  const getTeamToday = useCallback(async (): Promise<AttendanceRecord[]> => {
+    try {
+      return await fetchTodayRows();
+    } catch (e) {
+      throw new Error(
+        `Could not load today's attendance: ${e instanceof Error ? e.message : "unknown error"}`,
+      );
+    }
+  }, [fetchTodayRows]);
+
+  const getHistory = useCallback(
+    async (userId: string, limit = 60): Promise<AttendanceRecord[]> => {
+      const { data, error } = await supabase
+        .from("attendance")
+        .select("*")
+        .eq("user_id", userId)
+        .order("work_date", { ascending: false })
+        .limit(limit);
+      if (error) {
+        throw new Error(`Could not load attendance history: ${error.message}`);
+      }
+      return (data as unknown as AttendanceRow[]).map(mapAttendance);
+    },
+    [],
+  );
+
+  /** Manager (own team) or Admin sets a missed check-out time ("HH:MM", IST). */
+  const fixCheckOut = useCallback(
+    async (attendanceId: string, time: string): Promise<void> => {
+      const me = currentUserRef.current;
+      if (!me) throw new Error("Please log in again.");
+      if (!/^\d{2}:\d{2}$/.test(time)) {
+        throw new Error("Please pick a check-out time.");
+      }
+      const { data, error } = await supabase
+        .from("attendance")
+        .select("work_date, check_in_at")
+        .eq("id", attendanceId)
+        .single();
+      if (error || !data) {
+        throw new Error(
+          `Could not find that attendance record: ${error?.message ?? "unknown error"}`,
+        );
+      }
+      const row = data as { work_date: string; check_in_at: string };
+      const checkOutAt = `${row.work_date}T${time}:00+05:30`;
+      if (new Date(checkOutAt).getTime() <= new Date(row.check_in_at).getTime()) {
+        throw new Error("Check-out time must be after the check-in time.");
+      }
+      const { error: updateError } = await supabase
+        .from("attendance")
+        .update({ check_out_at: checkOutAt })
+        .eq("id", attendanceId);
+      if (updateError) {
+        throw new Error(`Could not save the check-out time: ${updateError.message}`);
+      }
+      await refreshTodayAttendance();
+    },
+    [refreshTodayAttendance],
+  );
+
   // --- Notifications ---------------------------------------------------------
   const markNotificationRead = useCallback(async (id: string) => {
     const { error } = await supabase
@@ -768,6 +972,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     tasks,
     notifications,
     currentUser,
+    todayAttendance,
+    attendanceLoading,
     authLoading,
     loading,
     authError,
@@ -780,6 +986,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     rejectTask,
     resubmitTask,
     addMember,
+    getTodayAttendance,
+    checkIn,
+    checkOut,
+    getTeamToday,
+    getHistory,
+    fixCheckOut,
+    refreshTodayAttendance,
     markNotificationRead,
     markAllNotificationsRead,
   };

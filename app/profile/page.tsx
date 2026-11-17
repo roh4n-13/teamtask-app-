@@ -6,7 +6,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, ChevronRight, ClipboardList, HelpCircle, LogOut, Users } from "lucide-react";
+import { Bell, ChevronRight, ClipboardList, Clock, HelpCircle, LogOut, Users } from "lucide-react";
 import RequireAuth from "@/components/RequireAuth";
 import { AppHeader, BottomNav } from "@/components/ui";
 import { useStore } from "@/lib/store";
@@ -59,6 +59,7 @@ function ProfileInner() {
           {menuRow("/tasks", <ClipboardList size={19} />, "My Tasks")}
           {menuRow("/notifications", <Bell size={19} />, "Notifications")}
           {menuRow("/team", <Users size={19} />, "Teams")}
+          {menuRow("/attendance", <Clock size={19} />, "Attendance")}
           <Link href="/notifications" className="flex items-center gap-3 px-4 py-3.5">
             <span className="text-charcoal"><HelpCircle size={19} /></span>
             <span className="flex-1 text-sm font-medium text-charcoal">Help &amp; Support</span>

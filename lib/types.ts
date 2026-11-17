@@ -91,3 +91,18 @@ export const STATUS_ORDER: TaskStatus[] = [
   "rejected",
   "completed",
 ];
+
+/**
+ * One attendance row = one person, one day.
+ * checkOutAt is null until the member checks out (null = missed check-out).
+ * Rows are NEVER deleted (see supabase/migration-002.sql).
+ */
+export interface AttendanceRecord {
+  id: string;
+  userId: string;
+  teamId: string | null;
+  workDate: string; // yyyy-mm-dd (Asia/Kolkata)
+  checkInAt: string; // ISO
+  checkOutAt: string | null; // ISO, null = missed check-out
+  createdAt: string; // ISO
+}

@@ -237,6 +237,39 @@ export function BottomNav() {
 }
 
 // ---------------------------------------------------------------------------
+// Attendance tabs — shared top tab row on the three Attendance pages
+// (Figma: pill container, active tab is a charcoal pill).
+// "Who's Here" is manager/admin only: RLS lets members see only their own
+// rows, so members get Today + History.
+// ---------------------------------------------------------------------------
+export function AttendanceTabs({
+  active,
+  showWho,
+}: {
+  active: "today" | "who" | "history";
+  showWho: boolean;
+}) {
+  const tab = (href: string, label: string, key: "today" | "who" | "history") => (
+    <Link
+      key={key}
+      href={href}
+      className={`flex-1 rounded-full py-2 text-center text-sm font-semibold ${
+        active === key ? "bg-charcoal text-white" : "text-stone-500"
+      }`}
+    >
+      {label}
+    </Link>
+  );
+  return (
+    <div className="mt-2 flex rounded-full bg-gold-light p-1">
+      {tab("/attendance", "Today", "today")}
+      {showWho && tab("/attendance/who", "Who's Here", "who")}
+      {tab("/attendance/history", "History", "history")}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Photo picker — compresses to ~200 KB before accepting the photo
 // ---------------------------------------------------------------------------
 export function PhotoPicker({

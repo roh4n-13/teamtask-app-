@@ -82,6 +82,13 @@ function AdminDashboardInner() {
           + Assign New Task
         </Link>
 
+        <Link
+          href="/attendance/who"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-charcoal bg-white py-3 text-[15px] font-semibold text-charcoal"
+        >
+          Attendance — Who's here today
+        </Link>
+
         {overdue > 0 && (
           <Link href="/tasks?filter=overdue" className="mt-3 block rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
             {overdue} task{overdue > 1 ? "s" : ""} overdue — review now →

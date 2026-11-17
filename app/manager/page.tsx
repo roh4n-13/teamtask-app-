@@ -57,6 +57,15 @@ function ManagerDashboardInner() {
           </div>
         </div>
 
+        {/* Attendance */}
+        <Link href="/attendance/who" className="mt-4 flex items-center justify-between rounded-2xl bg-gold-light px-4 py-3.5">
+          <span>
+            <span className="block text-sm font-bold text-charcoal">Attendance</span>
+            <span className="text-xs text-stone-500">See who's here today</span>
+          </span>
+          <span className="text-sm font-bold text-gold-deep">View →</span>
+        </Link>
+
         {/* Per-team rings */}
         <SectionTitle>Teams</SectionTitle>
         <div className="grid grid-cols-3 gap-3">
