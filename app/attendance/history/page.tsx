@@ -38,7 +38,7 @@ function HistoryInner() {
   const user = store.currentUser!;
 
   // Who can the viewer look at? Member: only self. Manager: own team.
-  // Admin: everyone (members + managers).
+  // Admin: everyone (members, managers and the Admin).
   const options = useMemo(() => {
     const inScope =
       user.role === "admin"
@@ -47,7 +47,7 @@ function HistoryInner() {
           ? store.users.filter((u) => u.teamId === user.teamId)
           : store.users.filter((u) => u.id === user.id);
     return inScope
-      .filter((u) => u.role === "member" || u.role === "manager")
+      .filter((u) => u.role === "member" || u.role === "manager" || u.role === "admin")
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [store.users, user.role, user.teamId, user.id]);
 
@@ -137,12 +137,16 @@ function HistoryInner() {
             className="mt-4 w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm font-medium text-charcoal outline-none focus:border-gold"
             aria-label="Choose a member"
           >
-            {options.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name}
-                {u.id === user.id ? " (you)" : ""}
-              </option>
-            ))}
+            {options.map((u) => {
+              const team = store.teams.find((t) => t.id === u.teamId);
+              const label = u.role === "admin" ? "Admin" : (team?.name ?? "—");
+              return (
+                <option key={u.id} value={u.id}>
+                  {u.name} — {label}
+                  {u.id === user.id ? " (you)" : ""}
+                </option>
+              );
+            })}
           </select>
         )}
 

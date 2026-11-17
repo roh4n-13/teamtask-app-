@@ -31,14 +31,15 @@ function WhosHereInner() {
     void refreshTodayAttendance();
   }, [refreshTodayAttendance]);
 
-  // Roster: team members + managers in the viewer's scope (not Admins).
+  // Roster: everyone in the viewer's scope — members, managers and the
+  // Admin (shown as "Admin" instead of a team).
   const roster = useMemo(() => {
     const inScope =
       user.role === "admin"
         ? store.users
         : store.users.filter((u) => u.teamId === user.teamId);
     return inScope
-      .filter((u) => u.role === "member" || u.role === "manager")
+      .filter((u) => u.role === "member" || u.role === "manager" || u.role === "admin")
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [store.users, user.role, user.teamId]);
 
@@ -112,9 +113,16 @@ function WhosHereInner() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={avatarPlaceholder(initials)} alt="" className="h-11 w-11 rounded-full" />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-bold text-charcoal">{u.name}</span>
+                        <span className="block truncate text-sm font-bold text-charcoal">
+                          {u.name}
+                          {u.role === "admin" ? (
+                            <span className="ml-2 inline-block rounded-full bg-gold px-2 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide text-charcoal">
+                              Admin
+                            </span>
+                          ) : null}
+                        </span>
                         <span className="block text-xs text-stone-500">
-                          {team?.name ?? "—"}
+                          {u.role === "admin" ? "Admin" : (team?.name ?? "—")}
                           {u.role === "manager" ? " · Manager" : ""}
                         </span>
                       </span>
