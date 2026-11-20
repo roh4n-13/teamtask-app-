@@ -162,9 +162,9 @@ function HistoryInner() {
         {/* Date rows */}
         <div className="mt-3 space-y-2">
           {loading ? (
-            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-500">Loading…</p>
+            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-600">Loading…</p>
           ) : rows.length === 0 ? (
-            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-500">
+            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-600">
               No attendance records yet.
             </p>
           ) : (
@@ -176,7 +176,7 @@ function HistoryInner() {
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-charcoal">{formatDayIST(r.workDate)}</p>
-                      <p className="mt-0.5 text-xs text-stone-500">
+                      <p className="mt-0.5 text-xs text-stone-600">
                         {formatTimeIST(r.checkInAt)} → {r.checkOutAt ? formatTimeIST(r.checkOutAt) : "—"}
                       </p>
                     </div>

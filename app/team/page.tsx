@@ -120,7 +120,7 @@ function TeamInner() {
 
         <div className="mt-3 space-y-3">
           {members.length === 0 ? (
-            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-500">No members found.</p>
+            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-600">No members found.</p>
           ) : (
             members.map((m) => {
               const p = memberProgress(m.id);
@@ -131,8 +131,8 @@ function TeamInner() {
                   <img src={avatarPlaceholder(initials)} alt="" className="h-11 w-11 rounded-full" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-charcoal">{m.name}</p>
-                    <p className="text-xs text-stone-500">{m.phone}</p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-stone-600">{m.phone}</p>
+                    <p className="text-xs text-stone-600">
                       {p.done} of {p.total} tasks done
                     </p>
                   </div>

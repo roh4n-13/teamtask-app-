@@ -51,7 +51,7 @@ function ApprovalInner() {
     return (
       <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
         <p className="text-base font-semibold text-charcoal">Not your team&apos;s task</p>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-stone-600">
           Managers can only review tasks from their own team.
         </p>
         <button onClick={() => router.back()} className="mt-4 rounded-xl bg-charcoal px-5 py-2.5 text-sm font-semibold text-white">
@@ -74,7 +74,7 @@ function ApprovalInner() {
         <h1 className="mt-4 text-xl font-bold text-charcoal">
           {decided === "approved" ? "Task approved" : "Task rejected"}
         </h1>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-stone-600">
           {decided === "approved"
             ? "The task is now complete. The member has been notified."
             : "The member has been notified and can fix and resubmit."}
@@ -93,7 +93,7 @@ function ApprovalInner() {
     return (
       <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
         <p className="text-base font-semibold text-charcoal">Nothing to review here</p>
-        <p className="mt-1 text-sm text-stone-500">
+        <p className="mt-1 text-sm text-stone-600">
           This task is currently “{task.status.replace("_", " ")}” — there is no submission waiting for approval.
         </p>
         <button onClick={() => router.back()} className="mt-4 rounded-xl bg-charcoal px-5 py-2.5 text-sm font-semibold text-white">
@@ -137,10 +137,10 @@ function ApprovalInner() {
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <StatusChip task={task} />
           <PriorityChip priority={task.priority} />
-          <span className="text-xs font-medium text-stone-500">{formatDeadline(task.deadline)}</span>
+          <span className="text-xs font-medium text-stone-600">{formatDeadline(task.deadline)}</span>
         </div>
         <p className="mt-3 text-[15px] leading-relaxed text-stone-700">{task.description}</p>
-        <p className="mt-2 text-sm text-stone-500">
+        <p className="mt-2 text-sm text-stone-600">
           {team?.name} · {assignee?.name} · submitted {formatDateTime(latest.submittedAt)}
         </p>
 
@@ -153,7 +153,7 @@ function ApprovalInner() {
         </div>
         {latest.note && (
           <div className="mt-3 rounded-2xl bg-white p-4">
-            <p className="text-xs font-semibold text-stone-500">Member&apos;s note</p>
+            <p className="text-xs font-semibold text-stone-600">Member&apos;s note</p>
             <p className="mt-1 text-sm text-stone-700">{latest.note}</p>
           </div>
         )}

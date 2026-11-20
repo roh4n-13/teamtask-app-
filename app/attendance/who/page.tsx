@@ -72,7 +72,7 @@ function WhosHereInner() {
         <AttendanceTabs active="who" showWho={user.role !== "member"} />
 
         {user.role === "member" ? (
-          <p className="mt-4 rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-500">
+          <p className="mt-4 rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-600">
             Only managers and Admin can see who's here today.
           </p>
         ) : (
@@ -93,7 +93,7 @@ function WhosHereInner() {
             {/* Member rows */}
             <div className="mt-3 space-y-2">
               {rows.length === 0 ? (
-                <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-500">
+                <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-600">
                   No team members yet.
                 </p>
               ) : (
@@ -121,7 +121,7 @@ function WhosHereInner() {
                             </span>
                           ) : null}
                         </span>
-                        <span className="block text-xs text-stone-500">
+                        <span className="block text-xs text-stone-600">
                           {u.role === "admin" ? "Admin" : (team?.name ?? "—")}
                           {u.role === "manager" ? " · Manager" : ""}
                         </span>

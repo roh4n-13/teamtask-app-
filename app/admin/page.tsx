@@ -111,7 +111,7 @@ function StatBox({ label, value, accent }: { label: string; value: number; accen
   return (
     <div className={`rounded-2xl border p-3 text-center ${accent ? "border-gold bg-gold-light" : "border-stone-200 bg-white"}`}>
       <p className="text-2xl font-bold text-charcoal">{value}</p>
-      <p className="text-[11px] font-medium text-stone-500">{label}</p>
+      <p className="text-[11px] font-medium text-stone-600">{label}</p>
     </div>
   );
 }

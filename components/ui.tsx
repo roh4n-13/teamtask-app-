@@ -126,7 +126,7 @@ export function TaskCard({ task, showTeam = true }: { task: Task; showTeam?: boo
         <h3 className="text-[15px] font-semibold leading-snug text-charcoal">{task.title}</h3>
         <StatusChip task={task} />
       </div>
-      <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-stone-500">{task.description}</p>
+      <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-stone-600">{task.description}</p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {showTeam && team && (
           <span className="flex items-center gap-1.5 text-xs font-medium text-stone-600">
@@ -134,10 +134,10 @@ export function TaskCard({ task, showTeam = true }: { task: Task; showTeam?: boo
             {team.name}
           </span>
         )}
-        {assignee && <span className="text-xs text-stone-500">· {assignee.name}</span>}
+        {assignee && <span className="text-xs text-stone-600">· {assignee.name}</span>}
         <PriorityChip priority={task.priority} />
       </div>
-      <p className={`mt-2 text-xs font-medium ${overdue ? "text-red-600" : "text-stone-500"}`}>
+      <p className={`mt-2 text-xs font-medium ${overdue ? "text-red-600" : "text-stone-600"}`}>
         {formatDeadline(task.deadline)}
       </p>
     </Link>
@@ -156,7 +156,7 @@ export function AppHeader({ title, subtitle }: { title: string; subtitle?: strin
     <header className="sticky top-0 z-20 flex items-center justify-between bg-paper/95 px-5 pb-2 pt-4 backdrop-blur">
       <div>
         <h1 className="text-xl font-bold leading-tight text-charcoal">{title}</h1>
-        {subtitle && <p className="text-xs text-stone-500">{subtitle}</p>}
+        {subtitle && <p className="text-xs text-stone-600">{subtitle}</p>}
       </div>
       <Link
         href="/notifications"
@@ -254,7 +254,7 @@ export function AttendanceTabs({
       key={key}
       href={href}
       className={`flex-1 rounded-full py-2 text-center text-sm font-semibold ${
-        active === key ? "bg-charcoal text-white" : "text-stone-500"
+        active === key ? "bg-charcoal text-white" : "text-stone-600"
       }`}
     >
       {label}
@@ -382,11 +382,11 @@ export function EmptyState({ title, hint }: { title: string; hint?: string }) {
     <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-4 py-8 text-center">
       <Check className="mx-auto mb-2 text-gold" size={24} />
       <p className="text-sm font-semibold text-charcoal">{title}</p>
-      {hint && <p className="mt-1 text-xs text-stone-500">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-stone-600">{hint}</p>}
     </div>
   );
 }
 
 export function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-stone-500">{children}</h2>;
+  return <h2 className="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-stone-600">{children}</h2>;
 }

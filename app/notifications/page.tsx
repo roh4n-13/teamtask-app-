@@ -94,7 +94,7 @@ function NotificationsInner() {
                     Deadline
                   </span>
                   <p className="mt-1.5 text-sm font-semibold text-charcoal">{t.title}</p>
-                  <p className="text-xs text-stone-500">Due {t.deadline} — finish it today.</p>
+                  <p className="text-xs text-stone-600">Due {t.deadline} — finish it today.</p>
                 </button>
               ))}
             </div>
@@ -106,7 +106,7 @@ function NotificationsInner() {
           <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-4 py-8 text-center">
             <BellRing className="mx-auto mb-2 text-gold" size={24} />
             <p className="text-sm font-semibold text-charcoal">No notifications yet</p>
-            <p className="mt-1 text-xs text-stone-500">New tasks, submissions and decisions will appear here.</p>
+            <p className="mt-1 text-xs text-stone-600">New tasks, submissions and decisions will appear here.</p>
           </div>
         ) : (
           <div className="space-y-2">

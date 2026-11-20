@@ -50,7 +50,7 @@ function MemberDashboardInner() {
         <Link href="/attendance" className="mt-3 flex items-center justify-between rounded-2xl bg-gold-light px-4 py-3.5">
           <span>
             <span className="block text-sm font-bold text-charcoal">Attendance</span>
-            <span className="text-xs text-stone-500">Check in when you arrive at the centre</span>
+            <span className="text-xs text-stone-600">Check in when you arrive at the centre</span>
           </span>
           <span className="text-sm font-bold text-gold-deep">Check In →</span>
         </Link>
@@ -64,7 +64,7 @@ function MemberDashboardInner() {
         <SectionTitle>My Tasks</SectionTitle>
         <div className="space-y-3">
           {myTasks.length === 0 ? (
-            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-500">
+            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-600">
               No tasks yet. Your manager will assign tasks here.
             </p>
           ) : (
@@ -81,7 +81,7 @@ function StatBox({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-stone-200 bg-white p-3 text-center">
       <p className="text-2xl font-bold text-charcoal">{value}</p>
-      <p className="text-[11px] font-medium text-stone-500">{label}</p>
+      <p className="text-[11px] font-medium text-stone-600">{label}</p>
     </div>
   );
 }

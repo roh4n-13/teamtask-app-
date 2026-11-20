@@ -39,7 +39,7 @@ function TaskDetailInner() {
     return (
       <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
         <p className="text-base font-semibold text-charcoal">Task not found</p>
-        <p className="mt-1 text-sm text-stone-500">It may have been removed.</p>
+        <p className="mt-1 text-sm text-stone-600">It may have been removed.</p>
         <button onClick={() => router.push("/tasks")} className="mt-4 rounded-xl bg-charcoal px-5 py-2.5 text-sm font-semibold text-white">
           Back to My Tasks
         </button>
@@ -84,7 +84,7 @@ function TaskDetailInner() {
         <h1 className="mt-4 text-xl font-bold text-charcoal">
           {wasResubmit ? "Resubmitted for approval" : "Submitted for approval"}
         </h1>
-        <p className="mt-1 text-sm text-stone-500">Your manager will review the photo proof.</p>
+        <p className="mt-1 text-sm text-stone-600">Your manager will review the photo proof.</p>
         <button onClick={() => router.push("/tasks")} className="mt-5 rounded-xl bg-charcoal px-5 py-2.5 text-sm font-semibold text-white">
           Back to My Tasks
         </button>
@@ -102,7 +102,7 @@ function TaskDetailInner() {
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <StatusChip task={task} />
           <PriorityChip priority={task.priority} />
-          <span className={`text-xs font-medium ${overdue ? "text-red-600" : "text-stone-500"}`}>
+          <span className={`text-xs font-medium ${overdue ? "text-red-600" : "text-stone-600"}`}>
             {formatDeadline(task.deadline)}
           </span>
         </div>
@@ -132,7 +132,7 @@ function TaskDetailInner() {
               {task.submissions.map((sub) => (
                 <div key={sub.id} className="rounded-2xl bg-white p-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-stone-500">{formatDateTime(sub.submittedAt)}</p>
+                    <p className="text-xs text-stone-600">{formatDateTime(sub.submittedAt)}</p>
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                         sub.decision === "approved"
@@ -247,7 +247,7 @@ function TaskDetailInner() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <p className="flex justify-between gap-4">
-      <span className="text-stone-500">{label}</span>
+      <span className="text-stone-600">{label}</span>
       <span className="font-medium text-charcoal">{value}</span>
     </p>
   );

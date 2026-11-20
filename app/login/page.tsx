@@ -47,7 +47,7 @@ export default function LoginPage() {
 
       <div className="flex-1 px-6 py-6">
         <h2 className="text-lg font-bold text-charcoal">Welcome back</h2>
-        <p className="mt-0.5 text-sm text-stone-500">Log in with your phone number and password.</p>
+        <p className="mt-0.5 text-sm text-stone-600">Log in with your phone number and password.</p>
 
         <form
           className="mt-5 space-y-3"
@@ -107,7 +107,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-3 text-center text-xs text-stone-500">
+        <p className="mt-3 text-center text-xs text-stone-600">
           Forgot your password? Ask your Admin to reset it.
         </p>
       </div>

@@ -61,7 +61,7 @@ function ManagerDashboardInner() {
         <Link href="/attendance/who" className="mt-4 flex items-center justify-between rounded-2xl bg-gold-light px-4 py-3.5">
           <span>
             <span className="block text-sm font-bold text-charcoal">Attendance</span>
-            <span className="text-xs text-stone-500">See who's here today</span>
+            <span className="text-xs text-stone-600">See who's here today</span>
           </span>
           <span className="text-sm font-bold text-gold-deep">View →</span>
         </Link>
@@ -91,7 +91,7 @@ function ManagerDashboardInner() {
         <SectionTitle>In Progress</SectionTitle>
         <div className="space-y-3">
           {inProgress.length === 0 ? (
-            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-500">
+            <p className="rounded-2xl bg-white px-4 py-6 text-center text-sm text-stone-600">
               No tasks in progress. Assign a task to get started.
             </p>
           ) : (

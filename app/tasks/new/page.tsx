@@ -76,7 +76,7 @@ function TaskAssignInner() {
       <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-2xl text-green-700">✓</span>
         <h1 className="mt-4 text-xl font-bold text-charcoal">Task assigned</h1>
-        <p className="mt-1 text-sm text-stone-500">The member has been notified in the app.</p>
+        <p className="mt-1 text-sm text-stone-600">The member has been notified in the app.</p>
       </main>
     );
   }

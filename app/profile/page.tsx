@@ -67,7 +67,7 @@ function ProfileInner() {
           </Link>
         </div>
 
-        <p className="mt-4 rounded-2xl bg-white px-4 py-3 text-xs leading-relaxed text-stone-500">
+        <p className="mt-4 rounded-2xl bg-white px-4 py-3 text-xs leading-relaxed text-stone-600">
           Help &amp; Support: ask your Admin (Rohan) if the app misbehaves or you forget your password. Only the Admin can reset passwords.
         </p>
 

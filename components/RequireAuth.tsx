@@ -37,14 +37,14 @@ export default function RequireAuth({
   if (store.authLoading || !store.currentUser) {
     return (
       <main className="flex flex-1 items-center justify-center px-6">
-        <p className="text-sm text-stone-500">Loading…</p>
+        <p className="text-sm text-stone-600">Loading…</p>
       </main>
     );
   }
   if (roles && !roles.includes(store.currentUser.role)) {
     return (
       <main className="flex flex-1 items-center justify-center px-6">
-        <p className="text-sm text-stone-500">Loading…</p>
+        <p className="text-sm text-stone-600">Loading…</p>
       </main>
     );
   }

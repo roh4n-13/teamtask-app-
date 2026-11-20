@@ -129,7 +129,7 @@ function AttendanceInner() {
         )}
 
         {/* Today timeline */}
-        <h2 className="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-stone-500">Today</h2>
+        <h2 className="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-stone-600">Today</h2>
         <div className="space-y-2">
           <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-3.5">
             <span className="flex items-center gap-2.5 text-sm font-semibold text-charcoal">
