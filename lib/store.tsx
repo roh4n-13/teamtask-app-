@@ -316,9 +316,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [tasks]);
 
   // --- Load everything for the signed-in user -------------------------------
-  const loadAll = useCallback(async (userId: string) => {
+  // `silent` is for the background auto-refresh: it updates the data
+  // without flipping the global `loading` flag (no spinner flicker).
+  const loadAll = useCallback(async (userId: string, opts?: { silent?: boolean }) => {
     const token = ++loadToken.current;
-    setLoading(true);
+    const silent = opts?.silent === true;
+    if (!silent) setLoading(true);
     try {
       const [teamsRes, usersRes, tasksRes, notifRes, attRes] = await Promise.all([
         supabase.from("teams").select("*").order("created_at"),
@@ -364,7 +367,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setNotifications((notifRes.data as unknown as NotificationRow[]).map(mapNotification));
       setTodayAttendance((attRes.data as unknown as AttendanceRow[]).map(mapAttendance));
     } finally {
-      if (token === loadToken.current) setLoading(false);
+      if (token === loadToken.current && !silent) setLoading(false);
     }
   }, []);
 
@@ -429,6 +432,38 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, [loadAll, loadProfileFor]);
+
+  // --- Auto-refresh: new tasks, attendance rows and notifications show
+  // up WITHOUT a manual refresh. While signed in, re-fetch every 20 s
+  // (only while the tab is visible) and immediately when the app comes
+  // back to the foreground (tab switch / app reopen / screen unlock).
+  // Silent: no loading spinner, the lists just update in place.
+  // (Fix for the reported bug: a member never saw a newly assigned task
+  // until they refreshed, because data only loaded at login and after
+  // the viewer's own actions.)
+  const AUTO_REFRESH_MS = 20_000;
+  useEffect(() => {
+    if (!currentUser) return;
+    const userId = currentUser.id;
+    const refresh = () => {
+      if (document.visibilityState === "visible") {
+        loadAll(userId, { silent: true }).catch(() => {});
+      }
+    };
+    const onForeground = () => {
+      if (document.visibilityState === "visible") {
+        loadAll(userId, { silent: true }).catch(() => {});
+      }
+    };
+    const id = window.setInterval(refresh, AUTO_REFRESH_MS);
+    document.addEventListener("visibilitychange", onForeground);
+    window.addEventListener("focus", onForeground);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onForeground);
+      window.removeEventListener("focus", onForeground);
+    };
+  }, [currentUser, loadAll]);
 
   // --- Helpers: notifications + activity log (best-effort — a failure here
   // must never break the task flow itself) ------------------------------------
