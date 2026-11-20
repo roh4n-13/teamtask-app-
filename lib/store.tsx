@@ -465,6 +465,41 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, [currentUser, loadAll]);
 
+  // --- Live updates (Supabase Realtime): when ANY user changes a task,
+  // submission, attendance row or notification, every other signed-in
+  // device reloads within ~1 second — no refresh, no 20 s wait. Events
+  // are coalesced (800 ms) so a burst of changes triggers one reload.
+  // Needs the tables in the `supabase_realtime` publication (one SQL
+  // line in the Supabase dashboard, run 2026-11-20). The 20 s poll
+  // above stays as a safety net if the live connection ever drops.
+  useEffect(() => {
+    if (!currentUser) return;
+    const userId = currentUser.id;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleReload = () => {
+      if (timer) return; // already scheduled — coalesce the burst
+      timer = setTimeout(() => {
+        timer = null;
+        if (document.visibilityState === "visible") {
+          loadAll(userId, { silent: true }).catch(() => {});
+        }
+      }, 800);
+    };
+    const channel = supabase
+      .channel("teamtask-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, scheduleReload)
+      .on("postgres_changes", { event: "*", schema: "public", table: "submissions" }, scheduleReload)
+      .on("postgres_changes", { event: "*", schema: "public", table: "attendance" }, scheduleReload)
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, scheduleReload)
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, scheduleReload)
+      .on("postgres_changes", { event: "*", schema: "public", table: "teams" }, scheduleReload)
+      .subscribe();
+    return () => {
+      if (timer) clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [currentUser, loadAll]);
+
   // --- Helpers: notifications + activity log (best-effort — a failure here
   // must never break the task flow itself) ------------------------------------
   const insertNotification = useCallback(
